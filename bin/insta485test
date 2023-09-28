@@ -1,0 +1,15 @@
+#!/bin/bash
+# insta485db
+
+# Stop on errors
+# See https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+set -Eeuo pipefail
+set -x
+
+# Runs code test
+pycodestyle insta485
+pydocstyle insta485
+pylint insta485
+
+#Run all test
+pytest -v tests

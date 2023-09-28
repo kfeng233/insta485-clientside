@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>
+        insta485
+    </title>
+</head>
+<body>
+  {% include 'navigation.html' %}
+<!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
+<form action="{{url_for('accounts',target=url_for('edit'))}}" method="post" enctype="multipart/form-data">
+  <input type="file" name="file" accept="image/*"/>
+  <input type="text" name="fullname" value="{{fullname}}" required/>
+  <input type="text" name="email" value="{{email}}" required/>
+  <input type="submit" name="update" value="submit"/>
+  <input type="hidden" name="operation" value="edit_account"/>
+</form>
+<h2><a href = "{{url_for('password')}}">Change password</a></h2><br/>
+<h2><a href = "{{url_for('delete')}}">Delete account</a></h2><br/>
+</body>
+</html>

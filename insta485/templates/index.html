@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		<title>insts485</title>
+    </head>
+  <body>
+    <!-- Plain old HTML and jinja2 nav bar goes here -->
+    {% include 'navigation.html' %}
+    {% for post in posts %}
+    <div class="posts">
+        <div class="profile">
+        {% for user in users %}
+            {% if post.owner == user.username %}
+            <a href="{{url_for('show_users', user_url_slug=post.owner)}}">
+                <img src="{{ url_for('get_image_url', filename=user.filename) }}" alt="photo of {{ post.owner }}" style="height: 40px; width: 40px; text-align: left;"/>
+            </a>
+            {% endif %}
+        {% endfor %}
+        <a href="{{url_for('show_users', user_url_slug=post.owner)}}" style="color: black; text-decoration: none; text-align: left;">{{ post.owner }}</a>
+        <a href="{{url_for('show_post', postid_url_slug=post.postid)}}" style="height: 40px; width: 40px; text-align:right; text-decoration: none; color: #686868; ">
+            {{ post.created }}
+        </a>
+        <div class="content">
+            <img src="{{ url_for('get_image_url', filename=post.filename) }}" alt="{{ post.owner }}_{{ post.postid }}" style="width: 500px; height: 500px;"/>
+        </div>
+        <div class="likes" style="text-align: left;">
+                    {{ post.num_likes }} {% if post.num_likes > 1 or post.num_likes == 0 %}likes{% else %}like{% endif %}
+                </div>
+        {% for comment in comments %}
+            {% if comment.postid == post.postid %}
+            <div class="comment" style="text-align: left;">	
+            <div>
+                <a href="{{url_for('show_users', user_url_slug=comment.owner)}}" style="color: black; text-decoration: none; font-weight: bold;">{{ comment.owner }}</a>
+                {{ comment.text }}
+            </div>	
+            </div>
+            {% endif %}
+                {% endfor %}
+        {% include 'likes.html' %}
+        {% include 'comments.html' %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <div id="reactEntry">
+      Loading ...
+    </div>
+    <!-- Load JavaScript -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bundle.js') }}"></script>  
+</body>
+</html>

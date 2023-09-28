@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>
+        insta485
+    </title>
+</head>
+<body>
+    {% include 'navigation.html' %}
+    <hr style="width:100%; text-align:left; margin-left:0">
+    {{username}}<br/>
+    <form action="{{url_for('accounts',target=url_for('create'))}}" method="post" enctype="multipart/form-data">
+        <input type="submit" name="delete" value="confirm delete account"/>
+        <input type="hidden" name="operation" value="delete"/>
+    </form>
+</body>
+</html>
+  

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>
+        insta485
+    </title>
+</head>
+<body>
+  {% include 'navigation.html' %}
+<!-- DO NOT CHANGE THIS (aside from styling) -->
+<form action="{{url_for('accounts',target=url_for('show_index'))}}" method="post" enctype="multipart/form-data">
+  <table>
+  <tr>
+  <td>Photo</td> <td><input type="file" name="file" required/></td>
+  </tr>
+  <tr>
+  <td>Name</td> <td><input type="text" name="fullname" required/></td>
+  </tr>
+  <tr>
+    <td>Username</td> <td><input type="text" name="username" required/></td>
+  </tr>
+  <tr>
+    <td>Email</td> <td><input type="text" name="email" required/></td>
+  </tr>
+  <tr>
+    <td>Password</td> <td><input type="password" name="password" required/></td>
+  </tr>
+  <tr>
+  <td> </td><td><input type="submit" name="signup" value="sign up"/></td>
+  </tr>
+  <input type="hidden" name="operation" value="create"/>
+  </table>
+</form>
+Have an account? <a href = "{{url_for('login')}}">Log in</a>
+</body>
+</html>

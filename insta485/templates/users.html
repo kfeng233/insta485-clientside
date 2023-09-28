@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>
+        insta485
+    </title>
+</head>
+<body>
+    {% include 'navigation.html' %}
+    <h2>{{username|e}}</h2>
+    
+        {% if logname == username %}
+        <a href = "{{url_for('edit')}}">Edit profile</a>
+        {% endif %}
+        {% if logname != username%}
+        {% if logname_follows_username is true %}
+        following
+        <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
+        <form action="{{url_for('follow_user', target = url_for('following',user_url_slug=user_url_slug))}}" method="post" enctype="multipart/form-data">
+            <input type="submit" name="unfollow" value="unfollow"/>
+            <input type="hidden" name="username" value="{{username}}"/>
+            <input type="hidden" name="operation" value="unfollow"/>
+        </form>
+        <br> 
+        {% else %}
+        not following
+        <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
+        <form action="{{url_for('follow_user', target = url_for('following',user_url_slug=user_url_slug))}}" method="post" enctype="multipart/form-data">
+            <input type="submit" name="follow" value="follow"/>
+            <input type="hidden" name="username" value="{{username}}"/>
+            <input type="hidden" name="operation" value="follow"/>
+        </form>
+        <br>
+        {% endif %}
+        {% endif %}
+        {% if total_posts==1 %}
+        1 post
+        {% else %}
+        {{total_posts}} posts
+        {% endif %}
+        
+        <a href="{{url_for('followers',user_url_slug=username)}}">
+                {% if followers==1 %}
+                1 follower 
+                {% else %}
+                {{ followers }} followers 
+                {% endif %}
+        </a>
+        <a href="{{url_for('following',user_url_slug=username)}}">{{ following }} following </a><br>
+        {{fullname|e}}<br>
+        {% if logname == username %}
+        <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
+        <form action="{{url_for('logout')}}" method="post" enctype="multipart/form-data">
+          <input type="submit" name="logout" value="Logout"/>
+        </form>
+
+        <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
+        <form action="{{ url_for('handle_post', target = url_for('show_users', user_url_slug=logname)) }}" method="post" enctype="multipart/form-data">
+          <input type="file" name="file" accept="image/*" required/>
+          <input type="submit" name="create_post" value="upload new post"/>
+          <input type="hidden" name="operation" value="create"/>
+        </form>
+
+        {% endif %}
+        {%  for post in posts %}
+        <a href="{{url_for('show_post', postid_url_slug=post.postid)}}"><img src="{{ url_for('get_image_url',filename = post.filename)}}" width="300" alt="nothing"></a>
+        {% endfor %}
+
+        {% if posts|length == 0%}
+        No posts yet.
+        {% endif %}
+
+</body>
+</html>

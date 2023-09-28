@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		<title>insts485</title>
+    </head>
+    <body>
+        {% include 'navigation.html' %}
+        <h1>Discover People</h1>
+        {% for unfollower in unfollowers %}
+        <div>
+            <a href="/users/{{ unfollower.username }}/">
+                <img src="{{ url_for('get_image_url', filename=unfollower.filename) }}" alt="{{ unfollower.username }}_profile" style="height: 40px; width: 40px; text-align: left;"/>
+                {{ unfollower.username }}
+            </a>
+        </div>
+        <div>
+            <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
+            <form action="{{url_for('follow_user', target = url_for('following',user_url_slug=session['username']))}}" method="post" enctype="multipart/form-data">
+                <input type="submit" name="follow" value="follow"/>
+                <input type="hidden" name="username" value="{{ unfollower.username }}"/>
+                <input type="hidden" name="operation" value="follow"/>
+            </form>
+        </div>
+        {% endfor %}
+    </body>
+</html>

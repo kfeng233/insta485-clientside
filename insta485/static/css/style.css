@@ -1,0 +1,29 @@
+.nav{
+    list-style: none;
+    text-align: right;
+}
+.nav li{
+    display:inline-block; 
+    padding:0 7px; 
+    position:relative;
+}
+.nav li:not(:last-child)::after{
+    content:""; 
+    border:1px solid #e2e2e2;
+    border-width: 1px 1px 0 0;
+    position:absolute; 
+    right:-3px; 
+    top:0; 
+    height:100%;
+}
+.posts{
+    background: #ffffff;
+	margin: 0 auto;
+	width: 500px;
+	height: auto;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+    margin-bottom: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}

@@ -1,0 +1,17 @@
+<nav class="navigation">
+<div class="container">
+  <div class="logo">
+    <a href="/">
+      <img src = "{{ url_for('static', filename='images/insta_logo.png') }}" alt="insta logo" style="height: 50px; width: 50px;"/>
+    </a>
+  </div>
+  <header style="font-family: fantasy; font-size: large;">INSTA485</header>
+  <ul class="nav">
+    {% if 'username' in session %}
+    <li><a href="{{url_for('explore')}}">explore</a></li>
+    <li><a href="{{url_for('show_users', user_url_slug=session['username'])}}">{{ session['username'] }}</a></li>
+    {% endif %}
+  </ul>
+</div>
+</nav>
+<hr style="width:100%; text-align:left; margin-left:0">

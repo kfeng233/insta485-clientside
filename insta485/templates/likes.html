@@ -1,0 +1,15 @@
+{% if post.likes_status %}
+<!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
+<form action="{{ url_for('likes', target = url_for('show_index')) }}" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="operation" value="unlike"/>
+    <input type="hidden" name="postid" value="{{ post.postid }}"/>
+    <input type="submit" name="unlike" value="unlike"/>
+</form>
+{% else %}
+<!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
+<form action="{{ url_for('likes', target = url_for('show_index')) }}" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="operation" value="like"/>
+    <input type="hidden" name="postid" value="{{ post.postid }}"/>
+    <input type="submit" name="like" value="like"/>
+</form>
+{% endif %}
