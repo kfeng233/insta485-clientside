@@ -2,7 +2,7 @@
 import flask
 import insta485
 from functools import wraps
-from insta485.views.accounts import verify
+from insta485.api.posts import authenticate
 '''
 def login_required(f):
     @wraps(f)
@@ -13,20 +13,23 @@ def login_required(f):
     return decorated_function
 '''
 
+
 @insta485.app.route('/api/v1/likes/',methods = ['POST'])
 def create_like():
     """Post like."""
     connection = insta485.model.get_db()
-    if 'username' not in flask.session:
-        username = flask.request.authorization['username']
-        password = flask.request.authorization['password']
-
-        # Authentication
-        if not verify(password, connection, username):
-            flask.abort(404)
-    else:
+    # Session cookies authentication
+    if 'username' in flask.session:
         username = flask.session['username']
-
+    # HTTP Basic Access Authentication: no credentials or invalid credentials
+    elif flask.request.authorization and authenticate(connection):
+        username = flask.request.authorization['username']
+    else:
+        response = {
+            "message": "Forbidden",
+            "status_code": 403
+        }
+        return flask.jsonify(response), 403
 
     postid = flask.request.args.get("postid", default=-1, type=int)
     cur = connection.execute(
@@ -37,13 +40,17 @@ def create_like():
     )
     content = cur.fetchall()
     if not content:
-        flask.abort(404)
+        response = {
+            "message": "Not Found",
+            "status_code": 404
+        }
+        return flask.jsonify(response), 404
     
     cur = connection.execute(
         "SELECT likeid "
         "FROM likes "
         "WHERE postid = ? AND owner = ? ",
-        [postid,username]
+        [postid, username]
     )
 
     content = cur.fetchall()
@@ -72,15 +79,18 @@ def create_like():
 def delete_like(likeid):
     """Delete like."""
     connection = insta485.model.get_db()
-    if 'username' not in flask.session:
-        username = flask.request.authorization['username']
-        password = flask.request.authorization['password']
-
-        # Authentication
-        if not verify(password, connection, username):
-            flask.abort(404)
-    else:
+    # Session cookies authentication
+    if 'username' in flask.session:
         username = flask.session['username']
+    # HTTP Basic Access Authentication: no credentials or invalid credentials
+    elif flask.request.authorization and authenticate(connection):
+        username = flask.request.authorization['username']
+    else:
+        response = {
+            "message": "Forbidden",
+            "status_code": 403
+        }
+        return flask.jsonify(response), 403
     
     cur = connection.execute(
         "SELECT * "
@@ -90,7 +100,11 @@ def delete_like(likeid):
     )
     likes_content = cur.fetchall()
     if not likes_content:
-        flask.abort(404)
+        response = {
+            "message": "Not Found",
+            "status_code": 404
+        }
+        return flask.jsonify(response), 404
     cur = connection.execute(
         "SELECT * "
         "FROM likes "
@@ -99,7 +113,11 @@ def delete_like(likeid):
     )
     likes_content = cur.fetchall()
     if not likes_content:
-        flask.abort(403)
+        response = {
+            "message": "Forbidden",
+            "status_code": 403
+        }
+        return flask.jsonify(response), 403
     else:
         cur = connection.execute(
             "DELETE FROM likes WHERE owner = ? AND likeid = ?",
