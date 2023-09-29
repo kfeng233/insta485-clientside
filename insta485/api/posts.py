@@ -8,6 +8,7 @@ from insta485.views.posts import get_comments_data
 
 @insta485.app.route('/api/v1/posts/')
 def get_page():
+    """"""
     connection = insta485.model.get_db()
     # Session cookies authentication
     if 'username' in flask.session:
