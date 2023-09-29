@@ -20,7 +20,7 @@ def get_page():
         username = flask.request.authorization['username']
         response = get_page_helper(connection, username)
         return response
-    flask.abort(403)
+    return flask.jsonify({"message": "Forbidden", "status_code": 403}), 403
 
 
 @insta485.app.route('/api/v1/posts/<int:postid_url_slug>/')
@@ -49,7 +49,7 @@ def get_post(postid_url_slug):
             }
             return flask.jsonify(response), 404
         return flask.jsonify(cur_post)
-    flask.abort(403)
+    return flask.jsonify({"message": "Forbidden", "status_code": 403}), 403
 
 
 def authenticate(connection):
