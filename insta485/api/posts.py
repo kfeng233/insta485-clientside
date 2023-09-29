@@ -8,7 +8,7 @@ from insta485.views.posts import get_comments_data
 
 @insta485.app.route('/api/v1/posts/')
 def get_page():
-    """"""
+    """Show posts in pagination."""
     connection = insta485.model.get_db()
     # Session cookies authentication
     if 'username' in flask.session:
@@ -25,7 +25,7 @@ def get_page():
 
 @insta485.app.route('/api/v1/posts/<int:postid_url_slug>/')
 def get_post(postid_url_slug):
-    """Return post on postid."""
+    """Return post based on postid."""
     connection = insta485.model.get_db()
     # Session cookies authentication
     if 'username' in flask.session:
@@ -111,7 +111,7 @@ def get_each_post_helper(connection, postid_url_slug, username):
     # get the post comments
     post_comments = get_each_post_comments(postid_url_slug, connection, username)
     comments_url = f'/api/v1/comments/?postid={postid_url_slug}'
-    # get the post likes
+    # get the post likes info
     post_likes = get_each_post_likes(connection, username, postid_url_slug)
     # get the post info
     cur = connection.execute("""
@@ -125,19 +125,12 @@ def get_each_post_helper(connection, postid_url_slug, username):
         WHERE users.username = ? AND posts.postid = ?""",
         (username, postid_url_slug))
     content = cur.fetchall()
+    # return empty if the post doesn't exist
     if not content:
         return
+    # hardcode the context
     ownerImgUrl = content[0]['user_filename']
     imgUrl = content[0]['post_filename']
-    '''
-    try:
-        img_path = insta485.app.config['UPLOAD_FOLDER']
-        content[0]['user_filename'] = flask.send_from_directory(img_path, ownerImgUrl)
-        content[0]['post_filename'] = flask.send_from_directory(img_path, imgUrl)
-    except FileNotFoundError:
-        flask.abort(404)'''
-    
-    print(post_comments)
     cur_path = flask.request.environ['RAW_URI']
     context = {
         "comments": post_comments, 
@@ -193,6 +186,3 @@ def get_each_post_likes(connection, username, postid_url_slug):
             "lognameLikesThis": len(likes_status) == 1,
             "url": url}
     return context
-
-
-    
