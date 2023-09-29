@@ -1,22 +1,13 @@
-"""REST API for likes."""
+"""REST API for comments."""
 import flask
 import insta485
 from functools import wraps
 from insta485.api.posts import authenticate
-'''
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if g.user is None:
-            return redirect(url_for('login', next=request.url))
-        return f(*args, **kwargs)
-    return decorated_function
-'''
 
 
-@insta485.app.route('/api/v1/likes/',methods = ['POST'])
-def create_like():
-    """Post like."""
+@insta485.app.route('/api/v1/comments/',methods = ['POST'])
+def create_comments():
+    """Post comment."""
     connection = insta485.model.get_db()
     # Session cookies authentication
     if 'username' in flask.session:
@@ -45,37 +36,30 @@ def create_like():
             "status_code": 404
         }
         return flask.jsonify(response), 404
-    
-    cur = connection.execute(
-        "SELECT likeid "
-        "FROM likes "
-        "WHERE postid = ? AND owner = ? ",
-        [postid, username]
+    text = flask.request.json['text']
+    connection.execute(
+        """INSERT INTO comments (owner, postid, text)
+        VALUES (?, ?, ?)""",
+        [username, postid, text]
     )
-
+    cur = connection.execute(
+        "SELECT last_insert_rowid() AS commentid "
+        "FROM comments "
+    )
     content = cur.fetchall()
-    flag = False
-    if not content:
-        flag = True
-        connection.execute(
-            "INSERT INTO likes (owner, postid)"
-            "VALUES (?,?)",
-            [username, postid]
-        )
-        cur = connection.execute(
-            "SELECT last_insert_rowid() AS likeid "
-            "FROM likes "
-        )
-        content = cur.fetchall()
     context = content[0]
-    context["url"] = "/api/v1/likes/"+str(context["likeid"])+"/"
+    context["lognameOwnsThis"] = True
+    context["owner"] = username
+    context["ownerShowUrl"] = "/users/{}/".format(username)
+    context["text"] = text
+    context["url"] = f"/api/v1/comments/{context['commentid']}/"
 
-    return flask.jsonify(**context), 201 if flag else 200
+    return flask.jsonify(**context), 201
 
 
-@insta485.app.route('/api/v1/likes/<int:likeid>/',methods = ['DELETE'])
-def delete_like(likeid):
-    """Delete like."""
+@insta485.app.route('/api/v1/comments/<int:commentid>/',methods = ['DELETE'])
+def delete_comment(commentid):
+    """Delete comment."""
     connection = insta485.model.get_db()
     # Session cookies authentication
     if 'username' in flask.session:
@@ -92,26 +76,26 @@ def delete_like(likeid):
     
     cur = connection.execute(
         "SELECT * "
-        "FROM likes "
-        "WHERE likeid = ?",
-        (likeid,)
+        "FROM comments "
+        "WHERE commentid = ?",
+        (commentid,)
     )
-    likes_content = cur.fetchall()
-    if not likes_content:
+    comments_content = cur.fetchall()
+    if not comments_content:
         response = {
             "message": "Not Found",
             "status_code": 404
         }
         return flask.jsonify(response), 404
-    elif likes_content[0]['owner'] != username:
+    elif comments_content[0]['owner'] != username:
         response = {
             "message": "Forbidden",
             "status_code": 403
         }
         return flask.jsonify(response), 403
     else:
-        cur = connection.execute(
-            "DELETE FROM likes WHERE owner = ? AND likeid = ?",
-            [username, likeid]
+        connection.execute(
+            "DELETE FROM comments WHERE owner = ? AND commentid = ?",
+            [username, commentid]
         )
         return flask.jsonify(**{}), 204
