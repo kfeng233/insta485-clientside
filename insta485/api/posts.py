@@ -122,8 +122,8 @@ def get_each_post_helper(connection, postid_url_slug, username):
             posts.filename AS post_filename
         FROM users
         JOIN posts ON users.username = posts.owner
-        WHERE users.username = ? AND posts.postid = ?""",
-        (username, postid_url_slug))
+        WHERE posts.postid = ?;""",
+        (postid_url_slug,))
     content = cur.fetchall()
     # return empty if the post doesn't exist
     if not content:
@@ -138,9 +138,9 @@ def get_each_post_helper(connection, postid_url_slug, username):
         "created": content[0]['posts_created'],
         "imgUrl": '/uploads/{}'.format(imgUrl),
         "likes": post_likes,
-        "owner": username,
+        "owner": content[0]['owner'],
         "ownerImgUrl": '/uploads/{}'.format(ownerImgUrl),
-        "ownerShowUrl": "/users/{}/".format(username),
+        "ownerShowUrl": "/users/{}/".format(content[0]['owner']),
         "postShowUrl": "/posts/{}/".format(postid_url_slug),
         "postid": postid_url_slug,
         "url": cur_path
