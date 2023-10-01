@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
-export default function Comment({ handleCommentSubmit, handleTextChange, handleDeleteButton, commentText, comments }) {
+export default function Comment({ handleCommentSubmit, handleTextChange, handleDeleteButton, commentText, comments, postid }) {
     /* Display and update comments */
+    /*
+    Yuning added a post prop to only show the input form when the post actually exist. 
+    The reason is that cypress will click / type input as long as the component contains button/form.
+    So when the fetch in post hasn't returned yet you need to make sure <Comment> component
+    doesn't contain any button / input form because it's not properly initialized. Same is true for <Like>
+    You could also use other prop as evidence. I'm not quite sure if use postid is ok in every situation.
+     */
     return (
       <div>
         {comments?.map((comment) =>
@@ -17,9 +24,12 @@ export default function Comment({ handleCommentSubmit, handleTextChange, handleD
           </div>
         )}
         <div>
-          <form data-testid="comment-form" onSubmit={handleCommentSubmit}>
-            <input type="text" value={commentText} onChange={handleTextChange}/>
-          </form>
+          {
+            postid &&
+            (<form data-testid="comment-form" onSubmit={handleCommentSubmit}>
+              <input type="text" value={commentText} onChange={handleTextChange}/>
+            </form>)
+          }
         </div>
       </div>
     );
