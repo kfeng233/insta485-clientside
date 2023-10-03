@@ -37,12 +37,15 @@ export default function Post({ url }) {
     };
   }, [url]);
 
+
   // Render post image and post owner
   return (
+    <li>
     <div className="post">
       <img src={imgUrl} alt="post_image" />
       <p>{owner}</p>
     </div>
+    </li>
   );
 }
 

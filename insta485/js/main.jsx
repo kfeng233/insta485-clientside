@@ -1,7 +1,7 @@
 import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import Post from "./post";
-import PostList from "./postList";
+
+import PostList from "./postlist";
 
 // Create a root
 const root = createRoot(document.getElementById("reactEntry"));
