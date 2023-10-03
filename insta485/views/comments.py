@@ -12,6 +12,8 @@ import insta485
 @insta485.app.route('/comments/', methods=['POST'])
 def comments():
     """Handle comments post request."""
+    if 'username' not in flask.session:
+        return flask.redirect(flask.url_for("login"))
     # flask.session['username'] = "Yuning"
     url = flask.request.args.get('target', '')
     operation = flask.request.form['operation']
