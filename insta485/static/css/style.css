@@ -27,3 +27,19 @@
     padding-top: 10px;
     padding-bottom: 10px;
 }
+.profiles{
+    height: 40px; 
+    width: 40px; 
+    text-align: left;
+}
+.created{
+    height: 40px; 
+    width: 40px; 
+    text-align:right; 
+    text-decoration: none; 
+    color: #686868; 
+}
+.post_img{
+    width: 500px; 
+    height: 500px;
+}

@@ -5,9 +5,15 @@ import PropTypes from "prop-types";
 // url is a prop for the Post component.
 export default function Post({ url }) {
   /* Display image and post owner of a single post */
-
-  const [imgUrl, setImgUrl] = useState("");
+  
+  const [comments, setComments] = useState([]);
   const [owner, setOwner] = useState("");
+  const [imgUrl, setImgUrl] = useState("");
+  const [ownerShowUrl, setOwnerShowUrl] = useState("");
+  const [ownerImgUrl, setOwnerImgUrl] = useState("");
+  const [created, setCreated] = useState("");
+  const [postShowUrl, setPostShowUrl] = useState("");
+  const [commentUrl, setCommentUrl] = useState("");
 
   useEffect(() => {
     // Declare a boolean flag that we can use to cancel the API request.
@@ -23,8 +29,15 @@ export default function Post({ url }) {
         // If ignoreStaleRequest was set to true, we want to ignore the results of the
         // the request. Otherwise, update the state to trigger a new render.
         if (!ignoreStaleRequest) {
-          setImgUrl(data.imgUrl);
+          console.log(data)
+          setComments([...data.comments]);
           setOwner(data.owner);
+          setOwnerShowUrl(data.ownerShowUrl);
+          setImgUrl(data.imgUrl);
+          setCreated(data.created);
+          setPostShowUrl(data.postShowUrl);
+          setOwnerImgUrl(data.ownerImgUrl);
+          setCommentUrl(data.commentUrl);
         }
       })
       .catch((error) => console.log(error));
@@ -39,13 +52,28 @@ export default function Post({ url }) {
 
   // Render post image and post owner
   return (
-    <div className="post">
-      <img src={imgUrl} alt="post_image" />
-      <p>{owner}</p>
+    <div className="posts">
+      <div>
+        <a href={ownerShowUrl}>
+          <img src={ownerImgUrl} alt="owner_profile" className="profiles"/>
+          {owner}
+        </a>
+        <a href={postShowUrl} className="created">{created}</a>
+      </div>
+      <img src={imgUrl} alt="post_image" className="post_img"/>
+      <div>
+        {comments?.map((comment) =>
+          <div key = {comment.commentid}>
+            <a href={comment.ownerShowUrl}>{comment.owner}: </a>
+            {comment.text}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 Post.propTypes = {
   url: PropTypes.string.isRequired,
+  //owner: PropTypes.string.isRequired
 };

@@ -3,8 +3,7 @@ import PropTypes from "prop-types";
 import Post from "./post";
 
 export default function PostList({ url }) {
-    const[next, setNextUrl] = useState("")
-    const[result, setResult] = useState("")
+    const[posts, setPosts] = useState([])
 
     useEffect(() => {
         let ignoreStaleRequest = false;
@@ -15,9 +14,8 @@ export default function PostList({ url }) {
             })
             .then((data) => {
                 if (!ignoreStaleRequest) {
-                    console.log(data);
-                    setNextUrl(data.next);
-                    setResult(data.result);
+                    setPosts([...data.results])
+                    // console.log(data)
                 }
             })
             .catch((error) => console.log(error));
@@ -26,12 +24,18 @@ export default function PostList({ url }) {
             ignoreStaleRequest = true;
         };
     }, [url]);
-
     return (
-        <div></div>
+        <div>
+            { posts?.map((post) =>
+                <Post 
+                    key={post.postid}
+                    {...post}
+                />
+            )}
+        </div>
     );
 }
 
-Post.propTypes = {
+PostList.propTypes = {
     url: PropTypes.string.isRequired,
 };
