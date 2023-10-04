@@ -5,22 +5,24 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import utc from "dayjs/plugin/utc";
 import duration from "dayjs/plugin/duration";
-
+import timezone from "dayjs/plugin/timezone";
 
 // The parameter of this function is an object with a string called url inside it.
 // url is a prop for the Post component.
 export default function Post({ url }) {
   /* Display image and post owner of a single post */
-  
-  const [comments, setComments] = useState([]);
   const [owner, setOwner] = useState("");
   const [imgUrl, setImgUrl] = useState("");
   const [ownerShowUrl, setOwnerShowUrl] = useState("");
   const [ownerImgUrl, setOwnerImgUrl] = useState("");
   const [created, setCreated] = useState("");
   const [postShowUrl, setPostShowUrl] = useState("");
+  const [postid, setPostid] = useState(0);
+  // for comment component
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
   const [comments_url, setCommentUrl] = useState("");
-  const [postid, setPostid] = useState("");
+
 
   useEffect(() => {
     // Declare a boolean flag that we can use to cancel the API request.
@@ -40,10 +42,12 @@ export default function Post({ url }) {
           dayjs.extend(relativeTime);
           dayjs.extend(utc);
           dayjs.extend(duration);
+          dayjs.extend(timezone);
           const curTime = dayjs.utc();
-          const createdTime = dayjs(data.created).utc();
-          const timeDiff = createdTime.diff(curTime);
-          const humanizedTime = dayjs.duration(-timeDiff).humanize(true);
+          const localCurTime = curTime.local();
+          const localCreatedTime = dayjs(data.created).utc('z').local().tz('America/Detroit');
+          const timeDiff = localCreatedTime.diff(localCurTime);
+          const humanizedTime = dayjs.duration(timeDiff).humanize(true);
 
           setComments([...data.comments]);
           setOwner(data.owner);
@@ -66,6 +70,53 @@ export default function Post({ url }) {
     };
   }, [url]);
 
+  // get the handleTextChange event value and set the text to the value
+  const handleTextChange = (e) => {
+    setCommentText(e.target.value);
+  };
+
+  // send a POST request to create a new comment and update the comments state
+  const handleCommentSubmit = async (e) => {
+    // prevent the page from reloading
+    e.preventDefault();
+    // empty comment
+    if (commentText.trim() === '') {
+      return;
+    }
+    fetch(`${comments_url}`, 
+      { credentials: "same-origin",
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: commentText }) })
+      .then((response) => {
+        if (!response.ok) throw Error(response.statusText);
+        return response.json();
+      })
+      .then((data) => {
+        setComments([...comments, data]);
+        setCommentText('');
+      })
+      .catch((error) => console.log(error));
+  };
+
+  // send the DELETE request to the API based on the id passed from the button
+  const handleDeleteButton = async (commentid) => {
+    fetch(`/api/v1/comments/${commentid}/`,
+      { credentials: "same-origin",
+        method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json',
+        }})
+        .then((response) => {
+          if (!response.ok) throw Error(response.statusText);
+          // remove the comment from the comments state
+          setComments(comments.filter((comment) => comment.commentid != commentid))
+        })
+        .catch((error) => console.log(error));
+  };
+
   // Render post image and post owner
   return (
     <div className="posts">
@@ -77,18 +128,16 @@ export default function Post({ url }) {
         <a href={postShowUrl} className="created">{created}</a>
       </div>
       <img src={imgUrl} alt="post_image" className="post_img"/>
-        <div>
+      <div>
           <Comment
-            key = {postid}
-            url = {comments_url}
-            comments = {comments?.map((comment) =>
-              <div key = {comment.commentid}>
-                <a href={comment.ownerShowUrl}>{comment.owner}: </a>
-                {comment.text}
-              </div>
-            )}
-          />
-        </div>
+          key = {postid}
+          handleTextChange={handleTextChange}
+          handleCommentSubmit = {handleCommentSubmit}
+          handleDeleteButton={handleDeleteButton}
+          commentText = {commentText}
+          comments = {comments}
+        />
+      </div>
     </div>
   );
 }
