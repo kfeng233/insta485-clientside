@@ -1,4 +1,4 @@
-"""REST API for resources"""
+"""REST API for resources."""
 import flask
 import insta485
 

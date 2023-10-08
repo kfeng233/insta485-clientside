@@ -7,9 +7,14 @@ set -Eeuo pipefail
 set -x
 
 # Runs code test
+npx eslint --ext jsx insta485/js
+npx prettier --check insta485/js
+
+# Runs code test
 pycodestyle insta485
 pydocstyle insta485
 pylint insta485
+
 
 #Run all test
 pytest -v tests

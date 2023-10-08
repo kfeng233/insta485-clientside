@@ -11,5 +11,5 @@ const root = createRoot(document.getElementById("reactEntry"));
 root.render(
   <StrictMode>
     <PostList url="/api/v1/posts/" />
-  </StrictMode>
+  </StrictMode>,
 );

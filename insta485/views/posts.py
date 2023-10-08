@@ -19,8 +19,8 @@ def handle_post():
     """Handle a post."""
     if 'username' not in flask.session:
         return flask.redirect(flask.url_for("login"))
-    url = flask.request.args.get('target', '')
     operation = flask.request.form['operation']
+    url = flask.request.args.get('target', '')
     connection = insta485.model.get_db()
     upload_path = insta485.app.config['UPLOAD_FOLDER']
     # delete a post including uploading picture, comments, likes

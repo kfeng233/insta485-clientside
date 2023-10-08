@@ -1,41 +1,17 @@
 """REST API for comments."""
 import flask
 import insta485
-from functools import wraps
-from insta485.api.posts import authenticate
+from insta485.api.posts import all_check, login_check
 
 
-@insta485.app.route('/api/v1/comments/',methods = ['POST'])
+@insta485.app.route('/api/v1/comments/', methods=['POST'])
 def create_comments():
     """Post comment."""
     connection = insta485.model.get_db()
-    # Session cookies authentication
-    if 'username' in flask.session:
-        username = flask.session['username']
-    # HTTP Basic Access Authentication: no credentials or invalid credentials
-    elif flask.request.authorization and authenticate(connection):
-        username = flask.request.authorization['username']
-    else:
-        response = {
-            "message": "Forbidden",
-            "status_code": 403
-        }
-        return flask.jsonify(response), 403
+    response, statuscode, username, postid = all_check(connection)
+    if response:
+        return flask.jsonify(response), statuscode
 
-    postid = flask.request.args.get("postid", default=-1, type=int)
-    cur = connection.execute(
-        "SELECT * "
-        "FROM posts "
-        "WHERE postid = ?",
-        [postid]
-    )
-    content = cur.fetchall()
-    if not content:
-        response = {
-            "message": "Not Found",
-            "status_code": 404
-        }
-        return flask.jsonify(response), 404
     text = flask.request.json['text']
     connection.execute(
         """INSERT INTO comments (owner, postid, text)
@@ -50,32 +26,23 @@ def create_comments():
     context = content[0]
     context["lognameOwnsThis"] = True
     context["owner"] = username
-    context["ownerShowUrl"] = "/users/{}/".format(username)
+    context["ownerShowUrl"] = f"/users/{username}/"
     context["text"] = text
     context["url"] = f"/api/v1/comments/{context['commentid']}/"
 
     return flask.jsonify(**context), 201
 
 
-@insta485.app.route('/api/v1/comments/<int:commentid>/',methods = ['DELETE'])
+@insta485.app.route('/api/v1/comments/<int:commentid>/', methods=['DELETE'])
 def delete_comment(commentid):
     """Delete comment."""
-    connection = insta485.model.get_db()
-    # Session cookies authentication
-    if 'username' in flask.session:
-        username = flask.session['username']
-    # HTTP Basic Access Authentication: no credentials or invalid credentials
-    elif flask.request.authorization and authenticate(connection):
-        username = flask.request.authorization['username']
-    else:
-        response = {
-            "message": "Forbidden",
-            "status_code": 403
-        }
+    connection_comment = insta485.model.get_db()
+    response, username = login_check(connection_comment)
+    if response:
         return flask.jsonify(response), 403
-    
-    cur = connection.execute(
-        "SELECT * "
+
+    cur = connection_comment.execute(
+        "SELECT owner "
         "FROM comments "
         "WHERE commentid = ?",
         (commentid,)
@@ -87,15 +54,14 @@ def delete_comment(commentid):
             "status_code": 404
         }
         return flask.jsonify(response), 404
-    elif comments_content[0]['owner'] != username:
+    if comments_content[0]['owner'] != username:
         response = {
             "message": "Forbidden",
             "status_code": 403
         }
         return flask.jsonify(response), 403
-    else:
-        connection.execute(
-            "DELETE FROM comments WHERE owner = ? AND commentid = ?",
-            [username, commentid]
-        )
-        return flask.jsonify(**{}), 204
+    connection_comment.execute(
+        "DELETE FROM comments WHERE owner = ? AND commentid = ?",
+        [username, commentid]
+    )
+    return flask.jsonify(**{}), 204
