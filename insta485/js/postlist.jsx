@@ -38,3 +38,38 @@ export default function PostList({ url }) {
 PostList.propTypes = {
     url: PropTypes.string.isRequired,
   };
+  /*
+  const fetchMoreData = ()=>{
+        if(next==="") return ;
+        fetch(next, { credentials: "same-origin" })
+            .then((response) => {
+                if (!response.ok) throw Error(response.statusText);
+                return response.json();
+            })
+            .then((data) => {
+                //if (!ignoreStaleRequest) {
+                    setPosts([...posts,...data.results])
+                    setNext(data.next)
+                    // console.log(data)
+                //}
+            })
+            .catch((error) => console.log(error));
+    };
+    return (
+        <InfiniteScroll
+          dataLength={posts.length}
+          next={fetchMoreData}
+          hasMore={true}
+          loader={<h4>Loading...</h4>}
+        >
+        <div>
+            { posts?.map((post) =>
+                <Post 
+                    key={post.postid}
+                    {...post}
+                />
+            )}
+        </div>
+        </InfiniteScroll>
+    );
+*/

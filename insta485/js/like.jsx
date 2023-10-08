@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
 export default function Like({handleClick,numlike,likestatus,likeurl,postid}) {
-    console.log(numlike,likestatus);
     return (
     <div>
         <p>
