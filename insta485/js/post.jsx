@@ -6,6 +6,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import utc from "dayjs/plugin/utc";
 import duration from "dayjs/plugin/duration";
 import timezone from "dayjs/plugin/timezone";
+import Like from "./like";
 
 // The parameter of this function is an object with a string called url inside it.
 // url is a prop for the Post component.
@@ -22,7 +23,10 @@ export default function Post({ url }) {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [comments_url, setCommentUrl] = useState("");
-
+  // for like component
+  const [numlike, setNumLike] = useState(0);
+  const [likestatus,setLikeStatus] = useState(false);
+  const [likeurl, setLikeUrl] = useState("");
 
   useEffect(() => {
     // Declare a boolean flag that we can use to cancel the API request.
@@ -58,6 +62,9 @@ export default function Post({ url }) {
           setOwnerImgUrl(data.ownerImgUrl);
           setCommentUrl(data.comments_url);
           setPostid(data.postid);
+          setLikeStatus(data.likes.lognameLikesThis);
+          setLikeUrl(data.likes.url);
+          setNumLike(data.likes.numLikes);
         }
       })
       .catch((error) => console.log(error));
@@ -116,7 +123,63 @@ export default function Post({ url }) {
         })
         .catch((error) => console.log(error));
   };
+  // Handle like & unlike in one handler
+  const handleClick = async (numlike, likestatus, likeurl, postid)=>{
+    fetch(likestatus ? likeurl : `/api/v1/likes/?${new URLSearchParams({
+        'postid': postid
+    })}`, {
+        credentials: "same-origin", 
+        method: likestatus ? "DELETE" : "POST", 
+    })
+    .then((response) => {
+      if (!response.ok) throw Error(response.statusText);
+      if (response.status === 201)
+      return response.json();
+      else return null;
+    })
+    .then((data) => {
+        // To be fixed : ignoreStaleRequest / abort 
+        if(data){
+          setLikeUrl(data.url);
+          setLikeStatus(true);
+          setNumLike(numlike+1);
+        }
+        else {
+          setLikeStatus(false);
+          setNumLike(numlike-1);
+        }
+        //likestatus? setLikeStatus(!likestatus)|| setNumLike(numlike-1) 
+        //      : setLikeStatus(!likestatus)|| setNumLike(numlike+1) ;
+    })
+    .catch((error) => console.log(error));
+  };
 
+  //Double click the image to like. To be added: heart animation.
+  const handleDoubleClick = async ()=>{
+    if(!likestatus){
+        setNumLike(numlike+1);
+        setLikeStatus(!likestatus);
+        fetch(`/api/v1/likes/?${new URLSearchParams({
+            'postid': postid
+        })}`, {
+            credentials: "same-origin", 
+            method: "POST", 
+        })
+        .then((response) => {
+          if (!response.ok) throw Error(response.statusText);
+          if (response.status === 201)
+          return response.json();
+          else return null;
+        })
+        .then((data) => {
+            // To be fixed : ignoreStaleRequest
+            if(data)
+            setLikeUrl(data.url); 
+        })
+        .catch((error) => console.log(error));
+    }
+  };
+  
   // Render post image and post owner
   return (
     <div className="posts">
@@ -127,7 +190,8 @@ export default function Post({ url }) {
         </a>
         <a href={postShowUrl} className="created">{created}</a>
       </div>
-      <img src={imgUrl} alt="post_image" className="post_img"/>
+      <img src={imgUrl} alt="post_image" className="post_img" onDoubleClick={handleDoubleClick}/>
+      <div><Like handleClick = {handleClick} numlike = {numlike} likestatus = {likestatus} likeurl= {likeurl} postid={postid}/></div>
       <div>
           <Comment
           key = {postid}
@@ -136,6 +200,7 @@ export default function Post({ url }) {
           handleDeleteButton={handleDeleteButton}
           commentText = {commentText}
           comments = {comments}
+          postid = {postid}
         />
       </div>
     </div>

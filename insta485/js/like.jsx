@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
-export default function Like({handleClick,numlike,likestatus}) {
+export default function Like({handleClick,numlike,likestatus,likeurl,postid}) {
+    console.log(numlike,likestatus);
     return (
     <div>
         <p>
             {numlike} {(numlike === 0 || numlike > 1) ? 'likes':'like'}
         </p>
-        <button onClick={handleClick} data-testid="like-unlike-button">
+        <p>
+        {postid && (
+        <button onClick={()=>handleClick(numlike,likestatus,likeurl,postid)} data-testid="like-unlike-button">
             {likestatus ? 'un' : ''}like
         </button>
+        )
+        }
+        </p>
     </div>
     );
 }
@@ -20,6 +26,8 @@ Like.propTypes = {
     handleClick: PropTypes.func,
     numlike: PropTypes.number, 
     likestatus: PropTypes.bool,
+    likeurl: PropTypes.string,
+    postid: PropTypes.number,
 };
 /*
 const [postid, setPostId] = useState(0);
