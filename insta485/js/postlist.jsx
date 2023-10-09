@@ -22,7 +22,7 @@ export default function PostList({ url }) {
             }
           })
           .catch((error) => console.log(error));
-        console.log("hello")
+        //console.log("hello")
         return () => {
           // This is a cleanup function that runs whenever the Post component
           // unmounts or re-renders. If a Post is about to unmount or re-render, we
