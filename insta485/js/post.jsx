@@ -130,13 +130,13 @@ export default function Post({ url }) {
       <img src={imgUrl} alt="post_image" className="post_img"/>
       <div>
           <Comment
-          key = {postid}
-          handleTextChange={handleTextChange}
-          handleCommentSubmit = {handleCommentSubmit}
-          handleDeleteButton={handleDeleteButton}
-          commentText = {commentText}
-          comments = {comments}
-        />
+            key = {postid}
+            handleTextChange={handleTextChange}
+            handleCommentSubmit = {handleCommentSubmit}
+            handleDeleteButton={handleDeleteButton}
+            commentText = {commentText}
+            comments = {comments}
+          />
       </div>
     </div>
   );
