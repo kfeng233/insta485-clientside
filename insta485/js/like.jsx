@@ -1,33 +1,41 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
-export default function Like({handleClick,numlike,likestatus,likeurl,postid}) {
-    console.log(numlike,likestatus);
-    return (
+export default function Like({
+  handleClick,
+  numlike,
+  likestatus,
+  likeurl,
+  postid,
+}) {
+  console.log(numlike, likestatus);
+  return (
     <div>
-        <p>
-            {numlike} {(numlike === 0 || numlike > 1) ? 'likes':'like'}
-        </p>
-        <p>
+      <p>
+        {numlike} {numlike === 0 || numlike > 1 ? "likes" : "like"}
+      </p>
+      <p>
         {postid && (
-        <button onClick={()=>handleClick(numlike,likestatus,likeurl,postid)} data-testid="like-unlike-button">
-            {likestatus ? 'un' : ''}like
-        </button>
-        )
-        }
-        </p>
+          <button
+            onClick={() => handleClick(numlike, likestatus, likeurl, postid)}
+            data-testid="like-unlike-button"
+          >
+            {likestatus ? "un" : ""}like
+          </button>
+        )}
+      </p>
     </div>
-    );
+  );
 }
 
 //<img src={imgUrl} alt="post_image" className="post_img" onDoubleClick={handleDoubleClick}/>
 //<Like handleClick = {handleClick} numlike = {numlike} likestatus = {likestatus}/>
 Like.propTypes = {
-    handleClick: PropTypes.func,
-    numlike: PropTypes.number, 
-    likestatus: PropTypes.bool,
-    likeurl: PropTypes.string,
-    postid: PropTypes.number,
+  handleClick: PropTypes.func,
+  numlike: PropTypes.number,
+  likestatus: PropTypes.bool,
+  likeurl: PropTypes.string,
+  postid: PropTypes.number,
 };
 /*
 const [postid, setPostId] = useState(0);

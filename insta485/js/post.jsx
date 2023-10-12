@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import Comment from "./comment";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import utc from "dayjs/plugin/utc";
 import duration from "dayjs/plugin/duration";
 import timezone from "dayjs/plugin/timezone";
+import Comment from "./comment";
 import Like from "./like";
 
 // The parameter of this function is an object with a string called url inside it.
@@ -22,10 +22,10 @@ export default function Post({ url }) {
   // for comment component
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
-  const [comments_url, setCommentUrl] = useState("");
+  const [commentsUrl, setCommentUrl] = useState("");
   // for like component
   const [numlike, setNumLike] = useState(0);
-  const [likestatus,setLikeStatus] = useState(false);
+  const [likestatus, setLikeStatus] = useState(false);
   const [likeurl, setLikeUrl] = useState("");
 
   useEffect(() => {
@@ -42,14 +42,17 @@ export default function Post({ url }) {
         // If ignoreStaleRequest was set to true, we want to ignore the results of the
         // the request. Otherwise, update the state to trigger a new render.
         if (!ignoreStaleRequest) {
-          // humanize the created time          
+          // humanize the created time
           dayjs.extend(relativeTime);
           dayjs.extend(utc);
           dayjs.extend(duration);
           dayjs.extend(timezone);
           const curTime = dayjs.utc();
           const localCurTime = curTime.local();
-          const localCreatedTime = dayjs(data.created).utc('z').local().tz('America/Detroit');
+          const localCreatedTime = dayjs(data.created)
+            .utc("z")
+            .local()
+            .tz("America/Detroit");
           const timeDiff = localCreatedTime.diff(localCurTime);
           const humanizedTime = dayjs.duration(timeDiff).humanize(true);
 
@@ -60,7 +63,7 @@ export default function Post({ url }) {
           setCreated(humanizedTime);
           setPostShowUrl(data.postShowUrl);
           setOwnerImgUrl(data.ownerImgUrl);
-          setCommentUrl(data.comments_url);
+          setCommentUrl(data.commentsUrl);
           setPostid(data.postid);
           setLikeStatus(data.likes.lognameLikesThis);
           setLikeUrl(data.likes.url);
@@ -87,120 +90,143 @@ export default function Post({ url }) {
     // prevent the page from reloading
     e.preventDefault();
     // empty comment
-    if (commentText.trim() === '') {
+    if (commentText.trim() === "") {
       return;
     }
-    fetch(`${comments_url}`, 
-      { credentials: "same-origin",
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: commentText }) })
+    fetch(`${commentsUrl}`, {
+      credentials: "same-origin",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text: commentText }),
+    })
       .then((response) => {
         if (!response.ok) throw Error(response.statusText);
         return response.json();
       })
       .then((data) => {
         setComments([...comments, data]);
-        setCommentText('');
+        setCommentText("");
       })
       .catch((error) => console.log(error));
   };
 
   // send the DELETE request to the API based on the id passed from the button
   const handleDeleteButton = async (commentid) => {
-    fetch(`/api/v1/comments/${commentid}/`,
-      { credentials: "same-origin",
-        method: "DELETE",
-        headers: {
-          'Content-Type': 'application/json',
-        }})
-        .then((response) => {
-          if (!response.ok) throw Error(response.statusText);
-          // remove the comment from the comments state
-          setComments(comments.filter((comment) => comment.commentid != commentid))
-        })
-        .catch((error) => console.log(error));
+    fetch(`/api/v1/comments/${commentid}/`, {
+      credentials: "same-origin",
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) throw Error(response.statusText);
+        // remove the comment from the comments state
+        setComments(
+          comments.filter((comment) => comment.commentid !== commentid),
+        );
+      })
+      .catch((error) => console.log(error));
   };
   // Handle like & unlike in one handler
-  const handleClick = async (numlike, likestatus, likeurl, postid)=>{
-    fetch(likestatus ? likeurl : `/api/v1/likes/?${new URLSearchParams({
-        'postid': postid
-    })}`, {
-        credentials: "same-origin", 
-        method: likestatus ? "DELETE" : "POST", 
-    })
-    .then((response) => {
-      if (!response.ok) throw Error(response.statusText);
-      if (response.status === 201)
-      return response.json();
-      else return null;
-    })
-    .then((data) => {
-        // To be fixed : ignoreStaleRequest / abort 
-        if(data){
+  const handleClick = async (numlike, likestatus, likeurl, postid) => {
+    fetch(
+      likestatus
+        ? likeurl
+        : `/api/v1/likes/?${new URLSearchParams({
+            postid: postid,
+          })}`,
+      {
+        credentials: "same-origin",
+        method: likestatus ? "DELETE" : "POST",
+      },
+    )
+      .then((response) => {
+        if (!response.ok) throw Error(response.statusText);
+        if (response.status === 201) return response.json();
+        else return null;
+      })
+      .then((data) => {
+        // To be fixed : ignoreStaleRequest / abort
+        if (data) {
           setLikeUrl(data.url);
           setLikeStatus(true);
-          setNumLike(numlike+1);
-        }
-        else {
+          setNumLike(numlike + 1);
+        } else {
           setLikeStatus(false);
-          setNumLike(numlike-1);
+          setNumLike(numlike - 1);
         }
-        //likestatus? setLikeStatus(!likestatus)|| setNumLike(numlike-1) 
+        //likestatus? setLikeStatus(!likestatus)|| setNumLike(numlike-1)
         //      : setLikeStatus(!likestatus)|| setNumLike(numlike+1) ;
-    })
-    .catch((error) => console.log(error));
+      })
+      .catch((error) => console.log(error));
   };
 
   //Double click the image to like. To be added: heart animation.
-  const handleDoubleClick = async ()=>{
-    if(!likestatus){
-        setNumLike(numlike+1);
-        setLikeStatus(!likestatus);
-        fetch(`/api/v1/likes/?${new URLSearchParams({
-            'postid': postid
-        })}`, {
-            credentials: "same-origin", 
-            method: "POST", 
-        })
+  const handleDoubleClick = async () => {
+    if (!likestatus) {
+      setNumLike(numlike + 1);
+      setLikeStatus(!likestatus);
+      fetch(
+        `/api/v1/likes/?${new URLSearchParams({
+          postid: postid,
+        })}`,
+        {
+          credentials: "same-origin",
+          method: "POST",
+        },
+      )
         .then((response) => {
           if (!response.ok) throw Error(response.statusText);
-          if (response.status === 201)
-          return response.json();
+          if (response.status === 201) return response.json();
           else return null;
         })
         .then((data) => {
-            // To be fixed : ignoreStaleRequest
-            if(data)
-            setLikeUrl(data.url); 
+          // To be fixed : ignoreStaleRequest
+          if (data) setLikeUrl(data.url);
         })
         .catch((error) => console.log(error));
     }
   };
-  
+
   // Render post image and post owner
   return (
     <div className="posts">
       <div>
         <a href={ownerShowUrl}>
-          <img src={ownerImgUrl} alt="owner_profile" className="profiles"/>
+          <img src={ownerImgUrl} alt="owner_profile" className="profiles" />
           {owner}
         </a>
-        <a href={postShowUrl} className="created">{created}</a>
+        <a href={postShowUrl} className="created">
+          {created}
+        </a>
       </div>
-      <img src={imgUrl} alt="post_image" className="post_img" onDoubleClick={handleDoubleClick}/>
-      <div><Like handleClick = {handleClick} numlike = {numlike} likestatus = {likestatus} likeurl= {likeurl} postid={postid}/></div>
+      <img
+        src={imgUrl}
+        alt="post_image"
+        className="post_img"
+        onDoubleClick={handleDoubleClick}
+      />
       <div>
-          <Comment
-          key = {postid}
+        <Like
+          handleClick={handleClick}
+          numlike={numlike}
+          likestatus={likestatus}
+          likeurl={likeurl}
+          postid={postid}
+        />
+      </div>
+      <div>
+        <Comment
+          key={postid}
           handleTextChange={handleTextChange}
-          handleCommentSubmit = {handleCommentSubmit}
+          handleCommentSubmit={handleCommentSubmit}
           handleDeleteButton={handleDeleteButton}
-          commentText = {commentText}
-          comments = {comments}
-          postid = {postid}
+          commentText={commentText}
+          comments={comments}
+          postid={postid}
         />
       </div>
     </div>

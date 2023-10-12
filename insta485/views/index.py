@@ -66,6 +66,7 @@ def get_posts_data(logname, connection):
 
 
 def index_posts_helper(posts, connection, logname):
+    """Get the likes info for a post."""
     for post in posts:
         # convert the time since the post was created in human-readable format
         past = arrow.get(post['created'], 'YYYY-MM-DD HH:mm:ss')

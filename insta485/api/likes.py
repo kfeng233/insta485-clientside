@@ -14,7 +14,7 @@ def login_required(f):
 '''
 
 
-@insta485.app.route('/api/v1/likes/',methods = ['POST'])
+@insta485.app.route('/api/v1/likes/', methods=['POST'])
 def create_like():
     """Post like."""
     connection = insta485.model.get_db()
@@ -30,7 +30,6 @@ def create_like():
             "status_code": 403
         }
         return flask.jsonify(response), 403
-
     postid = flask.request.args.get("postid", default=-1, type=int)
     cur = connection.execute(
         "SELECT * "
@@ -45,14 +44,12 @@ def create_like():
             "status_code": 404
         }
         return flask.jsonify(response), 404
-    
     cur = connection.execute(
         "SELECT likeid "
         "FROM likes "
         "WHERE postid = ? AND owner = ? ",
         [postid, username]
     )
-
     content = cur.fetchall()
     flag = False
     if not content:
@@ -69,11 +66,10 @@ def create_like():
         content = cur.fetchall()
     context = content[0]
     context["url"] = "/api/v1/likes/"+str(context["likeid"])+"/"
-
     return flask.jsonify(**context), 201 if flag else 200
 
 
-@insta485.app.route('/api/v1/likes/<int:likeid>/',methods = ['DELETE'])
+@insta485.app.route('/api/v1/likes/<int:likeid>/', methods=['DELETE'])
 def delete_like(likeid):
     """Delete like."""
     connection = insta485.model.get_db()
@@ -89,7 +85,6 @@ def delete_like(likeid):
             "status_code": 403
         }
         return flask.jsonify(response), 403
-    
     cur = connection.execute(
         "SELECT * "
         "FROM likes "
